@@ -25,10 +25,14 @@ const transitionEnd = whichTransitionEvent();
 
 @propConverter
 class FlipMove extends Component {
+  constructor() {
+    super();
+    this.boxes = {};
+  }
   componentWillReceiveProps() {
     // Get the bounding boxes of all currently-rendered, keyed children.
-    // Store it in this.state.
-    const newState = this.props.children.reduce( (state, child) => {
+    // Store it in this.boxes.
+    const boxes = this.props.children.reduce( (memo, child) => {
       // It is possible that a child does not have a `key` property;
       // Ignore these children, they don't need to be moved.
       if ( !child.key ) return state;
@@ -36,10 +40,10 @@ class FlipMove extends Component {
       const domNode     = ReactDOM.findDOMNode( this.refs[child.key] );
       const boundingBox = domNode.getBoundingClientRect();
 
-      return { ...state, [child.key]: boundingBox };
+      return { ...memo, [child.key]: boundingBox };
     }, {});
 
-    this.setState(newState);
+    this.boxes = boxes;
   }
 
   componentDidUpdate(previousProps) {
@@ -47,11 +51,9 @@ class FlipMove extends Component {
     // Compare to the bounding boxes stored in state.
     // Animate as required =)
 
-    // On the very first render, `componentWillReceiveProps` is not called.
-    // This means that `this.state` will be undefined.
-    // That's alright, though, because there is no possible transition on
-    // the first render; we only animate transitions between state changes =)
-    if ( !this.state ) return;
+    // If we don't have any boxes, we have nothing to do.
+    // This means we have no keyed children, or this is the
+    if ( Object.keys(this.boxes).length === '0' ) return;
 
     previousProps.children
       .filter(this.childNeedsToBeAnimated.bind(this))
@@ -67,7 +69,7 @@ class FlipMove extends Component {
     //
     // Tackle the first three first, since they're very easy to determine.
     const isImmovable   = !child.key;
-    const isBrandNew    = !this.state[child.key];
+    const isBrandNew    = !this.boxes[child.key];
     const isDestroyed   = !this.refs[child.key];
     if ( isImmovable || isBrandNew || isDestroyed ) return;
 
@@ -82,7 +84,7 @@ class FlipMove extends Component {
 
   getPositionDelta(domNode, key) {
     const newBox  = domNode.getBoundingClientRect();
-    const oldBox  = this.state[key];
+    const oldBox  = this.boxes[key];
 
     return [
       oldBox.left - newBox.left,
