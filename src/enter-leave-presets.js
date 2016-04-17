@@ -29,7 +29,7 @@
 export const leavePresets = {
   'elevator': {
     from: { transform: 'scale(1)', opacity: 1 },
-    to:   { transform: 'scale(0)', opacity: 0 }
+    to:   { transform: 'scale(0) translate(0)', opacity: 0 }
   },
   'fade': {
     from: { opacity: 1 },
@@ -37,11 +37,11 @@ export const leavePresets = {
   },
   'accordionVertical': {
     from: { transform: 'scaleY(1)', transformOrigin: 'center top' },
-    to:   { transform: 'scaleY(0)', transformOrigin: 'center top' }
+    to:   { transform: 'scaleY(0) translate(0)', transformOrigin: 'center top' }
   },
   'accordionHorizontal': {
     from: { transform: 'scaleX(1)', transformOrigin: 'left center' },
-    to:   { transform: 'scaleX(0)', transformOrigin: 'left center' }
+    to:   { transform: 'scaleX(0) translate(0)', transformOrigin: 'left center' }
   },
   'none': false
 };

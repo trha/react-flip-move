@@ -453,17 +453,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (this.props.leaveAnimation) {
 	          style = _extends({}, style, this.props.leaveAnimation.from);
 	        }
+	      }
+
+	      var domNode = _reactDom2.default.findDOMNode(this.refs[child.key]);
+
+	      var _getPositionDelta = this.getPositionDelta(domNode, child.key);
+
+	      var _getPositionDelta2 = _slicedToArray(_getPositionDelta, 2);
+
+	      var dX = _getPositionDelta2[0];
+	      var dY = _getPositionDelta2[1];
+
+	      // We need to set the new transform, but we also need to not clobber any
+	      // set value in our enter/leave animations! We need to preserve both
+	      // values. TODO: Use marcus433's transform merger when available.
+
+	      var newTransformStyle = 'translate(' + dX + 'px, ' + dY + 'px)';
+	      if (style.transform) {
+	        style.transform += ' ' + newTransformStyle;
 	      } else {
-	        var domNode = _reactDom2.default.findDOMNode(this.refs[child.key]);
-
-	        var _getPositionDelta = this.getPositionDelta(domNode, child.key);
-
-	        var _getPositionDelta2 = _slicedToArray(_getPositionDelta, 2);
-
-	        var dX = _getPositionDelta2[0];
-	        var dY = _getPositionDelta2[1];
-
-	        style.transform = 'translate(' + dX + 'px, ' + dY + 'px)';
+	        style.transform = newTransformStyle;
 	      }
 
 	      return style;
@@ -704,7 +713,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var leavePresets = exports.leavePresets = {
 	  'elevator': {
 	    from: { transform: 'scale(1)', opacity: 1 },
-	    to: { transform: 'scale(0)', opacity: 0 }
+	    to: { transform: 'scale(0) translate(0)', opacity: 0 }
 	  },
 	  'fade': {
 	    from: { opacity: 1 },
@@ -712,11 +721,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	  'accordionVertical': {
 	    from: { transform: 'scaleY(1)', transformOrigin: 'center top' },
-	    to: { transform: 'scaleY(0)', transformOrigin: 'center top' }
+	    to: { transform: 'scaleY(0) translate(0)', transformOrigin: 'center top' }
 	  },
 	  'accordionHorizontal': {
 	    from: { transform: 'scaleX(1)', transformOrigin: 'left center' },
-	    to: { transform: 'scaleX(0)', transformOrigin: 'left center' }
+	    to: { transform: 'scaleX(0) translate(0)', transformOrigin: 'left center' }
 	  },
 	  'none': false
 	};

@@ -266,10 +266,19 @@ class FlipMove extends Component {
           ...this.props.leaveAnimation.from
         };
       }
+    }
+
+    let domNode       = ReactDOM.findDOMNode( this.refs[child.key] );
+    const [ dX, dY ]  = this.getPositionDelta(domNode, child.key);
+
+    // We need to set the new transform, but we also need to not clobber any
+    // set value in our enter/leave animations! We need to preserve both
+    // values. TODO: Use marcus433's transform merger when available.
+    const newTransformStyle = `translate(${dX}px, ${dY}px)`
+    if ( style.transform ) {
+      style.transform += ' ' + newTransformStyle
     } else {
-      let domNode       = ReactDOM.findDOMNode( this.refs[child.key] );
-      const [ dX, dY ]  = this.getPositionDelta(domNode, child.key);
-      style.transform   = `translate(${dX}px, ${dY}px)`;
+      style.transform = newTransformStyle
     }
 
     return style;
