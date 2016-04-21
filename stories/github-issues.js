@@ -14,10 +14,78 @@ const items = [
 ]
 
 storiesOf('Github Issues', module)
-  .add('#31', () => (
+  .add('#31 - modern (Component)', () => (
     <Controls duration={400} />
+  ))
+  .add('#31 - legacy (createClass)', () => (
+    <OldStyleControls enterAnimation="elevator" leaveAnimation="elevator" />
   ));
 
+
+const OldStyleControls = React.createClass({
+  getInitialState() {
+    return { items: items.slice() }
+  },
+
+  buttonClickHandler() {
+    let newItems = this.state.items.slice();
+    newItems.splice(1, 1);
+
+    this.setState({ items: newItems });
+  },
+
+  listItemClickHandler(clickedItem) {
+    this.setState({
+      items: this.state.items.filter( item => item !== clickedItem )
+    });
+  },
+
+  restore() {
+    this.setState({ items })
+  },
+
+  renderItems() {
+    const answerWrapperStyle = {
+      backgroundColor: '#FFF',
+      borderRadius: '20px',
+      padding: '1em 2em',
+      marginBottom: '1em',
+      minWidth: 400
+    }
+
+    const answerStyle = {
+      fontSize: '16px'
+    }
+    return this.state.items.map( item => (
+      <div
+        style={answerWrapperStyle}
+        key={item.name}
+        onClick={() => this.listItemClickHandler(item)}
+      >
+        <div style={answerStyle}>{item.name}</div>
+      </div>
+    ))
+  },
+
+  render() {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        minHeight: '600px',
+        background: '#DDD'
+      }}>
+        <div style={{marginBottom: '50px'}}>
+          <button onClick={this.buttonClickHandler}>Remove</button>
+          <button onClick={this.restore}>add</button>
+        </div>
+        <FlipMove enterAnimation="elevator" leaveAnimation="elevator">
+          { this.renderItems() }
+        </FlipMove>
+      </div>
+    );
+  }
+});
 
 class Controls extends Component {
   constructor() {
