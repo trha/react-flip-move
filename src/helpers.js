@@ -4,7 +4,7 @@
  */
 
 export function convertToInt(val, propName) {
-  const int = typeof val === 'string' ? parseInt(val) : val;
+  const int = typeof val === 'string' ? parseInt(val, 10) : val;
 
   if ( isNaN(int) ) {
     console.error(`Invalid prop '${propName}' supplied to FlipMove. Expected a number, or a string that can easily be resolved to a number (eg. "100"). Instead, received '${val}'.`);
@@ -35,10 +35,10 @@ export function applyStylesToDOMNode(domNode, styles) {
 // Modified from Modernizr
 export function whichTransitionEvent() {
   const transitions = {
-    'transition':       'transitionend',
-    'OTransition':      'oTransitionEnd',
-    'MozTransition':    'transitionend',
-    'WebkitTransition': 'webkitTransitionEnd'
+    transition: 'transitionend',
+    OTransition: 'oTransitionEnd',
+    MozTransition: 'transitionend',
+    WebkitTransition: 'webkitTransitionEnd'
   };
 
   // If we're running in a browserless environment (eg. SSR), it doesn't apply.

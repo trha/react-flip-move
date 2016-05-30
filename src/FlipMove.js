@@ -55,11 +55,15 @@ class FlipMove extends Component {
       domNodes: []
     };
 
-    // When leaving items, we apply some over-ride styles to them (position,
-    // top, left). If the item is passed in through props BEFORE the item has
-    // finished leaving, its style will be wrong. So, to prevent any weirdness,
-    // we store the "original" styles here so they can be applied on re-entry.
-    // A crazy edge case, I know.
+    // A bug occurs when an item is removed from the list, and then re-added
+    // before its `leave` transition is complete (eg. toggling a filter on and
+    // off in rapid succession). It is because we apply some special styles -
+    // `position`, `top`, `left` - to exiting items, and those styles are never
+    // wiped clean.
+    //
+    // To solve this issue, we store the _original_ styles in this special
+    // object, and when the item is re-added, we override its `leave` styles
+    // with whatever they were originally.
     this.originalDomStyles = {};
   }
 
@@ -86,7 +90,19 @@ class FlipMove extends Component {
     // When the component is handed new props, we need to figure out the "resting"
     // position of all currently-rendered DOM nodes. We store that data in
     // this.boundingBoxes, so it can be used later to work out the animation.
+    this.gatherBoundingBoxes();
 
+    // Create our custom list of items.
+    // We use this list instead of props so that we can mutate it.
+    // We're keeping just-deleted nodes for a bit longer, as well as adding a
+    // flag to just-created nodes, so we know they need to be entered.
+    this.setState({
+      children: this.prepareNextChildren(nextProps.children)
+    });
+  }
+
+
+  gatherBoundingBoxes() {
     // Calculate the parentBox. This is used to find childBoxes relative
     // to the parent container, not the viewport.
     const parentBox = this.parentElement.getBoundingClientRect();
@@ -97,13 +113,13 @@ class FlipMove extends Component {
       // Ignore these children, they don't need to be moved.
       if ( !child.key ) return boxes;
 
-      const domNode     = ReactDOM.findDOMNode( this.refs[child.key] );
+      const domNode = ReactDOM.findDOMNode( this.refs[child.key] );
 
-      const childBox    = domNode.getBoundingClientRect();
+      const childBox = domNode.getBoundingClientRect();
       const relativeBox = {
-        'top':    childBox['top']  - parentBox['top'],
-        'left':   childBox['left'] - parentBox['left'],
-        'right':  parentBox['right'] - childBox['right'],
+        'top': childBox['top']  - parentBox['top'],
+        'left': childBox['left'] - parentBox['left'],
+        'right': parentBox['right'] - childBox['right'],
         'bottom': parentBox['bottom'] - childBox['bottom']
       };
 
@@ -114,14 +130,6 @@ class FlipMove extends Component {
       ...this.boundingBoxes,
       ...newBoundingBoxes
     };
-
-    // Create our custom list of items.
-    // We use this list instead of props so that we can mutate it.
-    // We're keeping just-deleted nodes for a bit longer, as well as adding a
-    // flag to just-created nodes, so we know they need to be entered.
-    this.setState({
-      children: this.prepareNextChildren(nextProps.children)
-    });
   }
 
 
