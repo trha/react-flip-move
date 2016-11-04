@@ -147,7 +147,7 @@ function propConverter(ComposedComponent) {
         }
       }
 
-      return newAnimation;
+      return typeof animation === 'function' ? newAnimation : () => newAnimation;
     }
 
 
@@ -189,6 +189,7 @@ function propConverter(ComposedComponent) {
         from: PropTypes.object,
         to: PropTypes.object,
       }),
+      PropTypes.func,
     ]),
     leaveAnimation: PropTypes.oneOfType([
       PropTypes.string,
@@ -197,6 +198,7 @@ function propConverter(ComposedComponent) {
         from: PropTypes.object,
         to: PropTypes.object,
       }),
+      PropTypes.func,
     ]),
     disableAllAnimations: PropTypes.bool,
     getPosition: PropTypes.func,

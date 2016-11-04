@@ -287,16 +287,22 @@ class FlipMove extends Component {
           opacity: '',
         };
 
-        if (child.entering && this.props.enterAnimation) {
-          styles = {
-            ...styles,
-            ...this.props.enterAnimation.to,
-          };
-        } else if (child.leaving && this.props.leaveAnimation) {
-          styles = {
-            ...styles,
-            ...this.props.leaveAnimation.to,
-          };
+        if (child.entering) {
+          const enterAnimation = this.props.enterAnimation(child);
+          if (enterAnimation) {
+            styles = {
+              ...styles,
+              ...enterAnimation.to,
+            };
+          }
+        } else if (child.leaving) {
+          const leaveAnimation = this.props.leaveAnimation(child);
+          if (leaveAnimation) {
+            styles = {
+              ...styles,
+              ...leaveAnimation.to,
+            };
+          }
         }
 
         // In FLIP terminology, this is the 'Play' stage.
@@ -448,10 +454,9 @@ class FlipMove extends Component {
         left: '',
         right: '',
         bottom: '',
-        ...this.props.enterAnimation.from,
       };
     } else if (child.leaving) {
-      return this.props.leaveAnimation.from;
+      return {};
     }
 
     const [dX, dY] = getPositionDelta({
@@ -498,8 +503,8 @@ class FlipMove extends Component {
 
     const { enterAnimation, leaveAnimation, getPosition } = this.props;
 
-    const isEnteringWithAnimation = child.entering && enterAnimation;
-    const isLeavingWithAnimation = child.leaving && leaveAnimation;
+    const isEnteringWithAnimation = child.entering && enterAnimation(child);
+    const isLeavingWithAnimation = child.leaving && leaveAnimation(child);
 
     if (isEnteringWithAnimation || isLeavingWithAnimation) {
       return true;
