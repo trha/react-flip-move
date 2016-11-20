@@ -78,12 +78,8 @@ function propConverter(ComposedComponent) {
       // Our enter/leave animations can be specified as boolean (default or
       // disabled), string (preset name), or object (actual animation values).
       // Let's standardize this so that they're always objects
-      workingProps.enterAnimation = this.convertAnimationProp(
-        workingProps.enterAnimation, enterPresets
-      );
-      workingProps.leaveAnimation = this.convertAnimationProp(
-        workingProps.leaveAnimation, leavePresets
-      );
+      workingProps.enterClassName = this.convertAnimationProp(workingProps.enterClassName);
+      workingProps.leaveClassName = this.convertAnimationProp(workingProps.leaveClassName);
 
       // Accept `disableAnimations`, but add a deprecation warning
       if (typeof props.disableAnimations !== 'undefined') {
@@ -112,42 +108,8 @@ function propConverter(ComposedComponent) {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    convertAnimationProp(animation, presets) {
-      let newAnimation;
-
-      switch (typeof animation) {
-        case 'boolean': {
-          // If it's true, we want to use the default preset.
-          // If it's false, we want to use the 'none' preset.
-          newAnimation = presets[
-            animation ? defaultPreset : disablePreset
-          ];
-          break;
-        }
-
-        case 'string': {
-          const presetKeys = Object.keys(presets);
-
-          if (presetKeys.indexOf(animation) === -1) {
-            console.error(invalidEnterLeavePreset({
-              value: animation,
-              acceptableValues: presetKeys.join(', '),
-              defaultValue: defaultPreset,
-            }));
-            newAnimation = presets[defaultPreset];
-          } else {
-            newAnimation = presets[animation];
-          }
-          break;
-        }
-
-        default: {
-          newAnimation = animation;
-          break;
-        }
-      }
-
-      return typeof animation === 'function' ? newAnimation : () => newAnimation;
+    convertAnimationProp(animation) {
+      return typeof animation === 'function' ? animation : () => animation;
     }
 
 
@@ -182,21 +144,17 @@ function propConverter(ComposedComponent) {
     onStartAll: PropTypes.func,
     onFinishAll: PropTypes.func,
     typeName: PropTypes.string,
-    enterAnimation: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.bool,
+    enterClassName: PropTypes.oneOfType([
       PropTypes.shape({
-        from: PropTypes.object,
-        to: PropTypes.object,
+        from: PropTypes.string,
+        to: PropTypes.string,
       }),
       PropTypes.func,
     ]),
-    leaveAnimation: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.bool,
+    leaveClassName: PropTypes.oneOfType([
       PropTypes.shape({
-        from: PropTypes.object,
-        to: PropTypes.object,
+        from: PropTypes.string,
+        to: PropTypes.string,
       }),
       PropTypes.func,
     ]),
@@ -212,8 +170,8 @@ function propConverter(ComposedComponent) {
     staggerDurationBy: 0,
     staggerDelayBy: 0,
     typeName: 'div',
-    enterAnimation: defaultPreset,
-    leaveAnimation: defaultPreset,
+    enterClassName: defaultPreset,
+    leaveClassName: defaultPreset,
     disableAllAnimations: false,
     getPosition: node => node.getBoundingClientRect(),
     maintainContainerHeight: false,

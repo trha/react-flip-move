@@ -159,7 +159,7 @@ class FlipMove extends Component {
 
       // If the child isn't leaving (or, if there is no leave animation),
       // we don't need to add it into the state children.
-      if (!isLeaving || !this.props.leaveAnimation) return;
+      if (!isLeaving || !this.props.leaveClassName) return;
 
       const nextChild = { ...child, leaving: true };
       const nextChildIndex = index + numOfChildrenLeaving;
@@ -179,14 +179,14 @@ class FlipMove extends Component {
     //   the parent's height doesn't collapse.
 
     const {
-      leaveAnimation,
+      leaveClassName,
       maintainContainerHeight,
       getPosition,
     } = this.props;
 
     // we need to make all leaving nodes "invisible" to the layout calculations
     // that will take place in the next step (this.runAnimation).
-    if (leaveAnimation) {
+    if (leaveClassName) {
       const leavingChildren = this.state.children.filter(child => (
         !!child.leaving
       ));
@@ -252,6 +252,15 @@ class FlipMove extends Component {
   animateChild(child, index) {
     const { domNode } = this.childrenData[child.key];
 
+    const className = (() => {
+      if (child.entering) {
+        return this.props.enterClassName(child);
+      } else if (child.leaving) {
+        return this.props.leaveClassName(child);
+      }
+    })() || {};
+    domNode.classList.add(className.from);
+
     // Apply the relevant style for this DOM node
     // This is the offset from its actual DOM position.
     // eg. if an item has been re-rendered 20px lower, we want to apply a
@@ -262,6 +271,7 @@ class FlipMove extends Component {
       domNode,
       styles: this.computeInitialStyles(child),
     });
+
 
     // Start by invoking the onStart callback for this child.
     if (this.props.onStart) this.props.onStart(child, domNode);
@@ -287,26 +297,9 @@ class FlipMove extends Component {
           opacity: '',
         };
 
-        if (child.entering) {
-          const enterAnimation = this.props.enterAnimation(child);
-          if (enterAnimation) {
-            styles = {
-              ...styles,
-              ...enterAnimation.to,
-            };
-          }
-        } else if (child.leaving) {
-          const leaveAnimation = this.props.leaveAnimation(child);
-          if (leaveAnimation) {
-            styles = {
-              ...styles,
-              ...leaveAnimation.to,
-            };
-          }
-        }
-
         // In FLIP terminology, this is the 'Play' stage.
         applyStylesToDOMNode({ domNode, styles });
+        domNode.classList.add(className.to);
       });
     });
 
@@ -327,6 +320,15 @@ class FlipMove extends Component {
 
       // Remove the 'transition' inline style we added. This is cleanup.
       domNode.style.transition = '';
+
+      if (child.entering) {
+        const enterClassName = this.props.enterClassName(child);
+        if (enterClassName) {
+          const { classList } = domNode
+          classList.remove(enterClassName.from);
+          classList.remove(enterClassName.to);
+        }
+      }
 
       // Trigger any applicable onFinish/onFinishAll hooks
       this.triggerFinishHooks(child, domNode);
@@ -501,10 +503,10 @@ class FlipMove extends Component {
       return false;
     }
 
-    const { enterAnimation, leaveAnimation, getPosition } = this.props;
+    const { enterClassName, leaveClassName, getPosition } = this.props;
 
-    const isEnteringWithAnimation = child.entering && enterAnimation(child);
-    const isLeavingWithAnimation = child.leaving && leaveAnimation(child);
+    const isEnteringWithAnimation = child.entering && enterClassName(child);
+    const isLeavingWithAnimation = child.leaving && leaveClassName(child);
 
     if (isEnteringWithAnimation || isLeavingWithAnimation) {
       return true;
@@ -574,7 +576,7 @@ class FlipMove extends Component {
     const {
       typeName,
       delegated,
-      leaveAnimation,
+      leaveClassName,
       maintainContainerHeight,
     } = this.props;
 
@@ -584,7 +586,7 @@ class FlipMove extends Component {
     };
 
     const children = this.childrenWithRefs();
-    if (leaveAnimation && maintainContainerHeight) {
+    if (leaveClassName && maintainContainerHeight) {
       children.push(this.createHeightPlaceholder());
     }
 
