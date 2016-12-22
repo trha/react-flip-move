@@ -321,12 +321,20 @@ class FlipMove extends Component {
       // Remove the 'transition' inline style we added. This is cleanup.
       domNode.style.transition = '';
 
+      const { classList } = domNode
       if (child.entering) {
         const enterClassName = this.props.enterClassName(child);
         if (enterClassName) {
-          const { classList } = domNode
           classList.remove(enterClassName.from);
           classList.remove(enterClassName.to);
+        }
+      }
+
+      if (child.leaving) {
+        const leaveClassName = this.props.leaveClassName(child);
+        if (leaveClassName) {
+          classList.remove(leaveClassName.from);
+          classList.remove(leaveClassName.to);
         }
       }
 
@@ -439,8 +447,8 @@ class FlipMove extends Component {
 
   computeInitialStyles(child) {
     const enterOrLeaveWithoutAnimation = (
-      (child.entering && !this.props.enterAnimation) ||
-      (child.leaving && !this.props.leaveAnimation)
+      (child.entering && !this.props.enterClassName) ||
+      (child.leaving && !this.props.leaveClassName)
     );
 
     if (enterOrLeaveWithoutAnimation) {
@@ -505,8 +513,8 @@ class FlipMove extends Component {
 
     const { enterClassName, leaveClassName, getPosition } = this.props;
 
-    const isEnteringWithAnimation = child.entering && enterClassName(child);
-    const isLeavingWithAnimation = child.leaving && leaveClassName(child);
+    const isEnteringWithAnimation = child.entering && enterClassName;
+    const isLeavingWithAnimation = child.leaving && leaveClassName;
 
     if (isEnteringWithAnimation || isLeavingWithAnimation) {
       return true;
